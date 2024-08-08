@@ -1,0 +1,12 @@
+---
+services:
+  greenfield_bot:
+    image: greenfield_bot:latest
+    container_name: greenfield_bot
+    restart: unless-stopped
+    environment:
+      BOTTOKEN: 0123456789:mysecrettoken
+    volumes:
+      - ./alerts.json:/app/alerts.json
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
