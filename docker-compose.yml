@@ -8,6 +8,6 @@ services:
       - .env
     volumes:
       - ./data.json:/app/data.json
-      - ./alerts.json:/app/alerts.json
+      - ./alerts.json:/app/alerts.json:ro
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro

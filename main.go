@@ -23,11 +23,34 @@ func main() {
 		bandsByDay[i] = append(bandsByDay[i], band)
 	}
 
-	b, err := NewClient(os.Getenv("BOTTOKEN"), bandsByDay)
+	b, err := NewClient(os.Getenv("BOTTOKEN"), bandsByDay, getWebhookOpts())
 	if err != nil {
 		log.Fatal(err)
 	}
 	if err := b.Run(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func getWebhookOpts() *WebhookOpts {
+	domain := os.Getenv("WEBHOOK_DOMAIN")
+	secret := os.Getenv("WEBHOOK_SECRET")
+	path := os.Getenv("WEBHOOK_PATH")
+	if path == "" {
+		path = "/webhook"
+	}
+	listenAddr := os.Getenv("WEBHOOK_LISTEN_ADDR")
+	if listenAddr == "" {
+		listenAddr = "localhost:8080"
+	}
+
+	if domain != "" && secret != "" {
+		return &WebhookOpts{
+			Domain:     domain,
+			Secret:     secret,
+			Path:       path,
+			ListenAddr: listenAddr,
+		}
+	}
+	return nil
 }

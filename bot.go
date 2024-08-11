@@ -14,13 +14,21 @@ import (
 )
 
 type Client struct {
-	bandsByDay [][]Band
-	bot        *gotgbot.Bot
-	alerts     map[int64][]*Alert
-	mu         sync.Mutex
+	bandsByDay  [][]Band
+	bot         *gotgbot.Bot
+	alerts      map[int64][]*Alert
+	mu          sync.Mutex
+	webhookOpts *WebhookOpts
 }
 
-func NewClient(token string, bandsByDay [][]Band) (*Client, error) {
+type WebhookOpts struct {
+	ListenAddr string
+	Secret     string
+	Domain     string
+	Path       string
+}
+
+func NewClient(token string, bandsByDay [][]Band, webhookOpts *WebhookOpts) (*Client, error) {
 	b, err := gotgbot.NewBot(token, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create bot: %w", err)
@@ -32,9 +40,10 @@ func NewClient(token string, bandsByDay [][]Band) (*Client, error) {
 	}
 
 	return &Client{
-		bandsByDay: bandsByDay,
-		bot:        b,
-		alerts:     alerts,
+		bandsByDay:  bandsByDay,
+		bot:         b,
+		alerts:      alerts,
+		webhookOpts: webhookOpts,
 	}, nil
 }
 
@@ -59,6 +68,27 @@ func (c *Client) Run() error {
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("alert_"), c.manageAlertsHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("back"), c.backHandler))
 
+	if c.webhookOpts != nil {
+		err := c.startWebhook(updater)
+		if err != nil {
+			return fmt.Errorf("failed to start webhook: %w", err)
+		}
+	} else {
+		err := c.startPolling(updater)
+		if err != nil {
+			return fmt.Errorf("failed to start polling: %w", err)
+		}
+	}
+
+	log.Printf("%s has been started...\n", c.bot.User.Username)
+
+	go c.alertLoop()
+
+	updater.Idle()
+	return nil
+}
+
+func (c *Client) startPolling(updater *ext.Updater) error {
 	err := updater.StartPolling(c.bot, &ext.PollingOpts{
 		DropPendingUpdates: true,
 		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
@@ -71,11 +101,26 @@ func (c *Client) Run() error {
 	if err != nil {
 		return fmt.Errorf("failed to start polling: %w", err)
 	}
-	log.Printf("%s has been started...\n", c.bot.User.Username)
+	return nil
+}
 
-	go c.alertLoop()
+func (c *Client) startWebhook(updater *ext.Updater) error {
+	err := updater.StartWebhook(c.bot, c.webhookOpts.Path, ext.WebhookOpts{
+		ListenAddr:  c.webhookOpts.ListenAddr,
+		SecretToken: c.webhookOpts.Secret,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to start webhook: %w", err)
+	}
 
-	updater.Idle()
+	err = updater.SetAllBotWebhooks(c.webhookOpts.Domain, &gotgbot.SetWebhookOpts{
+		MaxConnections:     100,
+		DropPendingUpdates: false,
+		SecretToken:        c.webhookOpts.Secret,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to set webhook: %w", err)
+	}
 	return nil
 }
 
