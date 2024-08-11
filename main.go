@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"os"
+
+	"github.com/jon4hz/lazyfestival_bot/db"
 )
 
 func main() {
@@ -23,7 +25,12 @@ func main() {
 		bandsByDay[i] = append(bandsByDay[i], band)
 	}
 
-	b, err := NewClient(os.Getenv("BOTTOKEN"), bandsByDay, getWebhookOpts())
+	db := db.New(os.Getenv("DB_FILE"))
+	if err := db.Connect(); err != nil {
+		log.Fatalf("could not connect to database: %v", err)
+	}
+
+	b, err := NewClient(os.Getenv("BOTTOKEN"), bandsByDay, db, getWebhookOpts())
 	if err != nil {
 		log.Fatal(err)
 	}

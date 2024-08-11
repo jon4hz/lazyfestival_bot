@@ -4,20 +4,19 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/callbackquery"
+	"github.com/jon4hz/lazyfestival_bot/db"
 )
 
 type Client struct {
 	bandsByDay  [][]Band
 	bot         *gotgbot.Bot
-	alerts      map[int64][]*Alert
-	mu          sync.Mutex
+	db          *db.Database
 	webhookOpts *WebhookOpts
 }
 
@@ -28,21 +27,26 @@ type WebhookOpts struct {
 	Path       string
 }
 
-func NewClient(token string, bandsByDay [][]Band, webhookOpts *WebhookOpts) (*Client, error) {
+type Alert struct {
+	Band  string
+	Time  time.Time
+	Min5  bool
+	Min15 bool
+	Min30 bool
+	Hour1 bool
+	Hour2 bool
+}
+
+func NewClient(token string, bandsByDay [][]Band, db *db.Database, webhookOpts *WebhookOpts) (*Client, error) {
 	b, err := gotgbot.NewBot(token, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create bot: %w", err)
 	}
 
-	alerts, err := loadAlerts()
-	if err != nil {
-		return nil, fmt.Errorf("failed to load alerts: %w", err)
-	}
-
 	return &Client{
 		bandsByDay:  bandsByDay,
 		bot:         b,
-		alerts:      alerts,
+		db:          db,
 		webhookOpts: webhookOpts,
 	}, nil
 }
@@ -63,6 +67,7 @@ func (c *Client) Run() error {
 	dispatcher.AddHandler(handlers.NewCommand("today", c.todayHandler))
 	dispatcher.AddHandler(handlers.NewCommand("timetable", c.timetableHandler))
 	dispatcher.AddHandler(handlers.NewCommand("alerts", c.alertsHandler))
+	dispatcher.AddHandler(handlers.NewCommand("now", c.nowHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("day_"), c.daysHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("band_"), c.bandsHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("alert_"), c.manageAlertsHandler))
@@ -127,65 +132,36 @@ func (c *Client) startWebhook(updater *ext.Updater) error {
 func (c *Client) alertLoop() {
 	ticker := time.NewTicker(3 * time.Minute)
 	for range ticker.C {
-		c.mu.Lock()
-		for chatID, alerts := range c.alerts {
-			for _, alert := range alerts {
-				if time.Now().After(alert.Time) {
-					continue
-				}
-				if alert.Min5 && time.Now().After(alert.Time.Add(-5*time.Minute)) {
-					_, err := c.bot.SendMessage(chatID, fmt.Sprintf("🔔 5 minutes until %q", alert.Band), nil)
-					if err != nil {
-						log.Println("failed to send message:", err)
-					} else {
-						alert.Min5 = false
-						log.Printf("5min alert for %q sent to %d", alert.Band, chatID)
-					}
-				}
-				if alert.Min15 && time.Now().After(alert.Time.Add(-15*time.Minute)) {
-					_, err := c.bot.SendMessage(chatID, fmt.Sprintf("🔔 15 minutes until %q", alert.Band), nil)
-					if err != nil {
-						log.Println("failed to send message:", err)
-					} else {
-						alert.Min15 = false
-						log.Printf("15min alert for %q sent to %d", alert.Band, chatID)
-					}
-				}
-				if alert.Min30 && time.Now().After(alert.Time.Add(-30*time.Minute)) {
-					_, err := c.bot.SendMessage(chatID, fmt.Sprintf("🔔 30 minutes until %q", alert.Band), nil)
-					if err != nil {
-						log.Println("failed to send message:", err)
-					} else {
-						alert.Min30 = false
-						log.Printf("30min alert for %q sent to %d", alert.Band, chatID)
-					}
-				}
-				if alert.Hour1 && time.Now().After(alert.Time.Add(-1*time.Hour)) {
-					_, err := c.bot.SendMessage(chatID, fmt.Sprintf("🔔 1 hour until %q", alert.Band), nil)
-					if err != nil {
-						log.Println("failed to send message:", err)
-					} else {
-						alert.Hour1 = false
-						log.Printf("1h alert for %q sent to %d", alert.Band, chatID)
-					}
-				}
-				if alert.Hour2 && time.Now().After(alert.Time.Add(-2*time.Hour)) {
-					_, err := c.bot.SendMessage(chatID, fmt.Sprintf("🔔 2 hours until %q", alert.Band), nil)
-					if err != nil {
-						log.Println("failed to send message:", err)
-					} else {
-						alert.Hour2 = false
-						log.Printf("2h alert for %q sent to %d", alert.Band, chatID)
-					}
+		alerts, err := c.db.GetReadyAlerts()
+		if err != nil {
+			log.Println("failed to get ready alerts:", err)
+			continue
+		}
+		for _, alert := range alerts {
+			var timeString string
+			switch alert.Min {
+			case 5:
+				timeString = "5 minutes"
+			case 15:
+				timeString = "15 minutes"
+			case 30:
+				timeString = "30 minutes"
+			case 60:
+				timeString = "1 hour"
+			case 120:
+				timeString = "2 hours"
+			}
+
+			_, err := c.bot.SendMessage(alert.TelegramId, fmt.Sprintf("🔔 %s until %q", timeString, alert.Band), nil)
+			if err != nil {
+				log.Println("failed to send message:", err)
+			} else {
+				log.Printf("%s alert for %q sent to %d", timeString, alert.Band, alert.TelegramId)
+				if err := c.db.DeleteAlert(alert); err != nil {
+					log.Println("failed to delete alert:", err)
 				}
 			}
 		}
-		go func() {
-			if err := storeAlerts(c.alerts); err != nil {
-				log.Println("failed to store alerts:", err)
-			}
-		}()
-		c.mu.Unlock()
 	}
 }
 
@@ -199,6 +175,14 @@ func (c *Client) startHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		{Command: "timetable", Description: "Get the timetable"},
 		{Command: "alerts", Description: "Manage your alerts"},
 	}, nil)
+	return err
+}
+
+func (c *Client) nowHandler(b *gotgbot.Bot, ctx *ext.Context) error {
+	_, err := b.SendMessage(ctx.EffectiveChat.Id, time.Now().Format("2006-01-02 15:04:05"), nil)
+	if err != nil {
+		return err
+	}
 	return err
 }
 
@@ -383,22 +367,36 @@ func (c *Client) bandsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func (c *Client) alertsByChatIDAndBandName(chatID int64, bandName string) *Alert {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	alerts, ok := c.alerts[chatID]
-	if !ok {
+	alerts, err := c.db.GetAlertsByTgIDAndBand(chatID, bandName)
+	if err != nil {
+		log.Println("failed to get alerts:", err)
 		return &Alert{
 			Band: bandName,
 		}
 	}
-	for _, alert := range alerts {
-		if alert.Band == bandName {
-			return alert
+	if len(alerts) == 0 {
+		return &Alert{
+			Band: bandName,
 		}
 	}
-	return &Alert{
-		Band: bandName,
+	alert := new(Alert)
+	for _, a := range alerts {
+		alert.Band = a.Band
+		alert.Time = a.Time
+		switch a.Min {
+		case 5:
+			alert.Min5 = true
+		case 15:
+			alert.Min15 = true
+		case 30:
+			alert.Min30 = true
+		case 60:
+			alert.Hour1 = true
+		case 120:
+			alert.Hour2 = true
+		}
 	}
+	return alert
 }
 
 func alertButtons(alert *Alert) [][]gotgbot.InlineKeyboardButton {
@@ -475,22 +473,45 @@ func (c *Client) manageAlertsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	chatID := ctx.EffectiveChat.Id
 
 	alert := c.alertsByChatIDAndBandName(chatID, band)
-
+	var minute int32
 	enable := action == "a"
 	switch frame {
 	case "5min":
 		alert.Min5 = enable
+		minute = 5
 	case "15min":
 		alert.Min15 = enable
+		minute = 15
 	case "30min":
 		alert.Min30 = enable
+		minute = 30
 	case "1hour":
 		alert.Hour1 = enable
+		minute = 60
 	case "2hours":
 		alert.Hour2 = enable
+		minute = 120
 	}
 
-	c.setAlert(chatID, band, alert)
+	dbAlert := db.Alert{
+		Band:       band,
+		Time:       alert.Time,
+		Min:        minute,
+		TelegramId: chatID,
+	}
+	if dbAlert.Time.IsZero() {
+		dbAlert.Time = c.getAlertTimeFromBand(band)
+	}
+
+	if enable {
+		if err := c.db.CreateAlert(dbAlert); err != nil {
+			log.Println("failed to create alert:", err)
+		}
+	} else {
+		if err := c.db.DeleteAlert(dbAlert); err != nil {
+			log.Println("failed to delete alert:", err)
+		}
+	}
 
 	_, _, err = cb.Message.EditText(b, fmt.Sprintf("🔔 Trigger alerts for %q", band), &gotgbot.EditMessageTextOpts{
 		ParseMode: "HTML",
@@ -501,44 +522,13 @@ func (c *Client) manageAlertsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	return err
 }
 
-func (c *Client) setAlert(chatID int64, band string, alert *Alert) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	defer func() {
-		go func() {
-			if err := storeAlerts(c.alerts); err != nil {
-				log.Println("failed to store alerts:", err)
-			}
-		}()
-	}()
-
-	alert.Band = band
-	if alert.Time.IsZero() {
-		for _, b := range c.bandsByDay {
-			for _, ba := range b {
-				if ba.Name == band {
-					alert.Time = ba.Date
-					break
-				}
+func (c *Client) getAlertTimeFromBand(band string) time.Time {
+	for _, b := range c.bandsByDay {
+		for _, ba := range b {
+			if ba.Name == band {
+				return ba.Date
 			}
 		}
 	}
-
-	if c.alerts == nil {
-		c.alerts = make(map[int64][]*Alert)
-		c.alerts[chatID] = []*Alert{alert}
-	} else {
-		a, ok := c.alerts[chatID]
-		if !ok {
-			c.alerts[chatID] = []*Alert{alert}
-		} else {
-			for i, al := range a {
-				if al.Band == band {
-					a[i] = alert
-					return
-				}
-			}
-			c.alerts[chatID] = append(a, alert)
-		}
-	}
+	return time.Time{}
 }
