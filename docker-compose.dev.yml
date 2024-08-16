@@ -1,7 +1,7 @@
 ---
 services:
   lazyfestival_bot:
-    image: lazyfestival_bot:latest
+    build: .
     container_name: lazyfestival_bot
     restart: unless-stopped
     env_file:

@@ -33,7 +33,7 @@ func load() ([]Band, error) {
 
 	bands := make([]Band, len(bandsInternal))
 	for i, bandInternal := range bandsInternal {
-		date, err := time.Parse("2006 January 02 15:04 MST", "2024 "+bandInternal.Date+" "+bandInternal.Time+" CEST")
+		date, err := time.Parse("02/01/2006 15:04 MST", bandInternal.Date+" "+bandInternal.Time+" CEST")
 		if err != nil {
 			return nil, err
 		}

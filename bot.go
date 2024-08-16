@@ -14,13 +14,13 @@ import (
 )
 
 type Client struct {
-	bandsByDay [3][]Band
+	bandsByDay [][]Band
 	bot        *gotgbot.Bot
 	alerts     map[int64][]*Alert
 	mu         sync.Mutex
 }
 
-func NewClient(token string, bandsByDay [3][]Band) (*Client, error) {
+func NewClient(token string, bandsByDay [][]Band) (*Client, error) {
 	b, err := gotgbot.NewBot(token, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create bot: %w", err)
@@ -92,41 +92,46 @@ func (c *Client) alertLoop() {
 					_, err := c.bot.SendMessage(chatID, fmt.Sprintf("🔔 5 minutes until %q", alert.Band), nil)
 					if err != nil {
 						log.Println("failed to send message:", err)
+					} else {
+						alert.Min5 = false
+						log.Printf("5min alert for %q sent to %d", alert.Band, chatID)
 					}
-					alert.Min5 = false
-					log.Printf("5min alert for %q sent to %d", alert.Band, chatID)
 				}
 				if alert.Min15 && time.Now().After(alert.Time.Add(-15*time.Minute)) {
 					_, err := c.bot.SendMessage(chatID, fmt.Sprintf("🔔 15 minutes until %q", alert.Band), nil)
 					if err != nil {
 						log.Println("failed to send message:", err)
+					} else {
+						alert.Min15 = false
+						log.Printf("15min alert for %q sent to %d", alert.Band, chatID)
 					}
-					alert.Min15 = false
-					log.Printf("15min alert for %q sent to %d", alert.Band, chatID)
 				}
 				if alert.Min30 && time.Now().After(alert.Time.Add(-30*time.Minute)) {
 					_, err := c.bot.SendMessage(chatID, fmt.Sprintf("🔔 30 minutes until %q", alert.Band), nil)
 					if err != nil {
 						log.Println("failed to send message:", err)
+					} else {
+						alert.Min30 = false
+						log.Printf("30min alert for %q sent to %d", alert.Band, chatID)
 					}
-					alert.Min30 = false
-					log.Printf("30min alert for %q sent to %d", alert.Band, chatID)
 				}
 				if alert.Hour1 && time.Now().After(alert.Time.Add(-1*time.Hour)) {
 					_, err := c.bot.SendMessage(chatID, fmt.Sprintf("🔔 1 hour until %q", alert.Band), nil)
 					if err != nil {
 						log.Println("failed to send message:", err)
+					} else {
+						alert.Hour1 = false
+						log.Printf("1h alert for %q sent to %d", alert.Band, chatID)
 					}
-					alert.Hour1 = false
-					log.Printf("1h alert for %q sent to %d", alert.Band, chatID)
 				}
 				if alert.Hour2 && time.Now().After(alert.Time.Add(-2*time.Hour)) {
 					_, err := c.bot.SendMessage(chatID, fmt.Sprintf("🔔 2 hours until %q", alert.Band), nil)
 					if err != nil {
 						log.Println("failed to send message:", err)
+					} else {
+						alert.Hour2 = false
+						log.Printf("2h alert for %q sent to %d", alert.Band, chatID)
 					}
-					alert.Hour2 = false
-					log.Printf("2h alert for %q sent to %d", alert.Band, chatID)
 				}
 			}
 		}
@@ -153,15 +158,14 @@ func (c *Client) startHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func (c *Client) todayHandler(b *gotgbot.Bot, ctx *ext.Context) error {
-	var i int
-	switch time.Now().Day() {
-	case c.bandsByDay[0][0].Date.Day():
-		i = 0
-	case c.bandsByDay[1][0].Date.Day():
-		i = 1
-	case c.bandsByDay[2][0].Date.Day():
-		i = 2
-	default:
+	var i = -1
+	for d := range c.bandsByDay {
+		if time.Now().Day() == c.bandsByDay[d][0].Date.Day() {
+			i = d
+			break
+		}
+	}
+	if i == -1 {
 		_, err := b.SendMessage(ctx.EffectiveChat.Id, "No bands today 😞", nil)
 		return err
 	}
@@ -235,7 +239,7 @@ func (c *Client) timetableHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 func (c *Client) alertsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	_, err := ctx.EffectiveMessage.Reply(b, "📅 For which day would you like to manage your alerts?", &gotgbot.SendMessageOpts{
 		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
-			InlineKeyboard: festivalDays(),
+			InlineKeyboard: c.festivalDays(),
 		},
 	})
 	return err
@@ -250,14 +254,17 @@ func (c *Client) backHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	_, _, err = cb.Message.EditText(b, "📅 For which day would you like to manage your alerts?", &gotgbot.EditMessageTextOpts{
 		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
-			InlineKeyboard: festivalDays(),
+			InlineKeyboard: c.festivalDays(),
 		},
 	})
 	return err
 }
 
-func festivalDays() [][]gotgbot.InlineKeyboardButton {
-	days := [3]string{"Thursday, June 13", "Friday, June 14", "Saturday, June 15"}
+func (c *Client) festivalDays() [][]gotgbot.InlineKeyboardButton {
+	var days []string
+	for _, bands := range c.bandsByDay {
+		days = append(days, bands[0].Date.Format("Monday, January 02"))
+	}
 	var festivalDays [][]gotgbot.InlineKeyboardButton
 	for _, day := range days {
 		festivalDays = append(festivalDays, []gotgbot.InlineKeyboardButton{
@@ -265,6 +272,15 @@ func festivalDays() [][]gotgbot.InlineKeyboardButton {
 		})
 	}
 	return festivalDays
+}
+
+func (c *Client) indexFromDay(day string) int {
+	for i, bands := range c.bandsByDay {
+		if bands[0].Date.Format("Monday, January 02") == day {
+			return i
+		}
+	}
+	return -1
 }
 
 func (c *Client) daysHandler(b *gotgbot.Bot, ctx *ext.Context) error {
@@ -275,16 +291,10 @@ func (c *Client) daysHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	day := strings.TrimPrefix(cb.Data, "day_")
-	var i int
-	switch day {
-	case "Thursday, June 13":
-		i = 0
-	case "Friday, June 14":
-		i = 1
-	case "Saturday, June 15":
-		i = 2
-	default:
-		i = 0
+
+	i := c.indexFromDay(day)
+	if i == -1 {
+		log.Println("Failed to get day by index!")
 	}
 
 	_, _, err = cb.Message.EditText(b, "🤘 Select the band.", &gotgbot.EditMessageTextOpts{

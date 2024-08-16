@@ -11,13 +11,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var bandsByDay [3][]Band
-	firstDay := bands[0].Date.Day()
+	var bandsByDay = make([][]Band, 1)
+	currDay := bands[0].Date.Day()
 	i := 0
 	for _, band := range bands {
-		if band.Date.Day() != firstDay {
+		if band.Date.Day() != currDay {
 			i++
-			firstDay = band.Date.Day()
+			currDay = band.Date.Day()
+			bandsByDay = append(bandsByDay, make([]Band, 0))
 		}
 		bandsByDay[i] = append(bandsByDay[i], band)
 	}

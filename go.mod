@@ -1,4 +1,4 @@
-module github.com/jon4hz/greenfield_bot
+module github.com/jon4hz/lazyfestival_bot
 
 go 1.22.4
 
