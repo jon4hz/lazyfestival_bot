@@ -1,230 +1,230 @@
 [
     {
-        "date": "16/08/2024",
-        "time": "13:00",
-        "band": "Vicious Rain",
-        "stage": "Casino"
+        "date": "12/06/2025",
+        "time": "14:00",
+        "band": "Alphornbläser",
+        "stage": "Jungfrau"
     },
     {
-        "date": "16/08/2024",
-        "time": "13:40",
-        "band": "Avralize",
-        "stage": "Iceberg"
+        "date": "12/06/2025",
+        "time": "14:30",
+        "band": "Betontod",
+        "stage": "Jungfrau"
     },
     {
-        "date": "16/08/2024",
-        "time": "14:20",
-        "band": "Urne",
-        "stage": "Casino"
+        "date": "12/06/2025",
+        "time": "16:00",
+        "band": "Subway to Sally",
+        "stage": "Jungfrau"
     },
     {
-        "date": "16/08/2024",
-        "time": "15:05",
-        "band": "Bodysnatcher",
-        "stage": "Iceberg"
+        "date": "12/06/2025",
+        "time": "17:35",
+        "band": "Spiritbox",
+        "stage": "Jungfrau"
     },
     {
-        "date": "16/08/2024",
-        "time": "15:50",
-        "band": "All For Metal",
-        "stage": "Casino"
-    },
-    {
-        "date": "16/08/2024",
-        "time": "16:35",
-        "band": "Rise Of The Northstar",
-        "stage": "Iceberg"
-    },
-    {
-        "date": "16/08/2024",
-        "time": "17:25",
-        "band": "Insomnium",
-        "stage": "Casino"
-    },
-    {
-        "date": "16/08/2024",
-        "time": "18:20",
-        "band": "Lionheart",
-        "stage": "Iceberg"
-    },
-    {
-        "date": "16/08/2024",
-        "time": "19:20",
-        "band": "Amaranthe",
-        "stage": "Casino"
-    },
-    {
-        "date": "16/08/2024",
-        "time": "20:25",
-        "band": "Exodus",
-        "stage": "Iceberg"
-    },
-    {
-        "date": "16/08/2024",
-        "time": "21:30",
-        "band": "Amorphis",
-        "stage": "Casino"
-    },
-    {
-        "date": "16/08/2024",
-        "time": "22:45",
-        "band": "Behemoth",
-        "stage": "Iceberg"
-    },
-    {
-        "date": "17/08/2024",
-        "time": "00:10",
-        "band": "Comeback Kid",
-        "stage": "Casino"
-    },
-    {
-        "date": "17/08/2024",
-        "time": "13:00",
-        "band": "Kassogtha",
-        "stage": "Iceberg"
-    },
-    {
-        "date": "17/08/2024",
-        "time": "13:35",
-        "band": "Thrown",
-        "stage": "Casino"
-    },
-    {
-        "date": "17/08/2024",
-        "time": "14:15",
-        "band": "Vukovi",
-        "stage": "Iceberg"
-    },
-    {
-        "date": "17/08/2024",
-        "time": "14:55",
-        "band": "Xandria",
-        "stage": "Casino"
-    },
-    {
-        "date": "17/08/2024",
-        "time": "15:40",
-        "band": "Annisokay",
-        "stage": "Iceberg"
-    },
-    {
-        "date": "17/08/2024",
-        "time": "16:25",
-        "band": "Crownshift",
-        "stage": "Casino"
-    },
-    {
-        "date": "17/08/2024",
-        "time": "17:10",
-        "band": "Rotting Christ",
-        "stage": "Iceberg"
-    },
-    {
-        "date": "17/08/2024",
-        "time": "18:00",
-        "band": "Brothers Of Metal",
-        "stage": "Casino"
-    },
-    {
-        "date": "17/08/2024",
-        "time": "18:50",
-        "band": "Caliban",
-        "stage": "Iceberg"
-    },
-    {
-        "date": "17/08/2024",
-        "time": "19:45",
-        "band": "Dark Tranquillity",
-        "stage": "Casino"
-    },
-    {
-        "date": "17/08/2024",
-        "time": "20:40",
-        "band": "The Amity Affliction",
-        "stage": "Iceberg"
-    },
-    {
-        "date": "17/08/2024",
-        "time": "21:35",
-        "band": "Beast In Black",
-        "stage": "Casino"
-    },
-    {
-        "date": "17/08/2024",
-        "time": "22:45",
-        "band": "In Extremo",
-        "stage": "Iceberg"
-    },
-    {
-        "date": "18/08/2024",
-        "time": "00:10",
-        "band": "SKÁLD",
-        "stage": "Casino"
-    },
-    {
-        "date": "18/08/2024",
-        "time": "13:00",
-        "band": "Infinitas",
-        "stage": "Iceberg"
-    },
-    {
-        "date": "18/08/2024",
-        "time": "13:35",
-        "band": "Dymytry",
-        "stage": "Casino"
-    },
-    {
-        "date": "18/08/2024",
-        "time": "14:15",
-        "band": "Illumishade",
-        "stage": "Iceberg"
-    },
-    {
-        "date": "18/08/2024",
-        "time": "14:55",
-        "band": "Elvenking",
-        "stage": "Casino"
-    },
-    {
-        "date": "18/08/2024",
-        "time": "15:40",
-        "band": "Havok",
-        "stage": "Iceberg"
-    },
-    {
-        "date": "18/08/2024",
-        "time": "16:25",
-        "band": "Dartagnan",
-        "stage": "Casino"
-    },
-    {
-        "date": "18/08/2024",
-        "time": "17:15",
-        "band": "Sodom",
-        "stage": "Iceberg"
-    },
-    {
-        "date": "18/08/2024",
-        "time": "18:10",
-        "band": "Dragonforce",
-        "stage": "Casino"
-    },
-    {
-        "date": "18/08/2024",
+        "date": "12/06/2025",
         "time": "19:05",
-        "band": "Axel Rudi Pell",
-        "stage": "Iceberg"
+        "band": "Sex Pistols feat. Frank Carter",
+        "stage": "Jungfrau"
     },
     {
-        "date": "18/08/2024",
-        "time": "20:05",
-        "band": "Jinjer",
-        "stage": "Casino"
-    },
-    {
-        "date": "18/08/2024",
+        "date": "12/06/2025",
         "time": "21:15",
-        "band": "Kreator",
-        "stage": "Iceberg"
+        "band": "Powerwolf",
+        "stage": "Jungfrau"
+    },
+    {
+        "date": "12/06/2025",
+        "time": "23:30",
+        "band": "Electric Callboy",
+        "stage": "Jungfrau"
+    },
+    {
+        "date": "12/06/2025",
+        "time": "15:30",
+        "band": "Sickret",
+        "stage": "Eiger"
+    },
+    {
+        "date": "12/06/2025",
+        "time": "17:00",
+        "band": "Annisokay",
+        "stage": "Eiger"
+    },
+    {
+        "date": "12/06/2025",
+        "time": "18:20",
+        "band": "Stray From The Path",
+        "stage": "Eiger"
+    },
+    {
+        "date": "12/06/2025",
+        "time": "20:20",
+        "band": "Me First and the Gimme Gimmes",
+        "stage": "Eiger"
+    },
+    {
+        "date": "12/06/2025",
+        "time": "22:30",
+        "band": "Thrice",
+        "stage": "Eiger"
+    },
+    {
+        "date": "13/06/2025",
+        "time": "13:30",
+        "band": "Selbstbedienung",
+        "stage": "Jungfrau"
+    },
+    {
+        "date": "13/06/2025",
+        "time": "14:45",
+        "band": "Versengold",
+        "stage": "Jungfrau"
+    },
+    {
+        "date": "13/06/2025",
+        "time": "16:15",
+        "band": "The Ghost Inside",
+        "stage": "Jungfrau"
+    },
+    {
+        "date": "13/06/2025",
+        "time": "17:45",
+        "band": "Motionless In White",
+        "stage": "Jungfrau"
+    },
+    {
+        "date": "13/06/2025",
+        "time": "19:20",
+        "band": "Alligatdah",
+        "stage": "Jungfrau"
+    },
+    {
+        "date": "13/06/2025",
+        "time": "21:20",
+        "band": "Heaven Shall Burn",
+        "stage": "Jungfrau"
+    },
+    {
+        "date": "13/06/2025",
+        "time": "23:30",
+        "band": "Avenged Sevenfold",
+        "stage": "Jungfrau"
+    },
+    {
+        "date": "13/06/2025",
+        "time": "14:15",
+        "band": "Polar Shift",
+        "stage": "Eiger"
+    },
+    {
+        "date": "13/06/2025",
+        "time": "15:45",
+        "band": "Archers",
+        "stage": "Eiger"
+    },
+    {
+        "date": "13/06/2025",
+        "time": "17:15",
+        "band": "Talco",
+        "stage": "Eiger"
+    },
+    {
+        "date": "13/06/2025",
+        "time": "18:45",
+        "band": "High Vis",
+        "stage": "Eiger"
+    },
+    {
+        "date": "13/06/2025",
+        "time": "20:35",
+        "band": "The Warning",
+        "stage": "Eiger"
+    },
+    {
+        "date": "13/06/2025",
+        "time": "22:35",
+        "band": "Landmvrks",
+        "stage": "Eiger"
+    },
+    {
+        "date": "14/06/2025",
+        "time": "13:30",
+        "band": "Mindcollision",
+        "stage": "Jungfrau"
+    },
+    {
+        "date": "14/06/2025",
+        "time": "14:40",
+        "band": "Jinjer",
+        "stage": "Jungfrau"
+    },
+    {
+        "date": "14/06/2025",
+        "time": "16:05",
+        "band": "Lord of the Lost",
+        "stage": "Jungfrau"
+    },
+    {
+        "date": "14/06/2025",
+        "time": "17:30",
+        "band": "Grandson",
+        "stage": "Jungfrau"
+    },
+    {
+        "date": "14/06/2025",
+        "time": "19:00",
+        "band": "Donots",
+        "stage": "Jungfrau"
+    },
+    {
+        "date": "14/06/2025",
+        "time": "21:05",
+        "band": "In Flames",
+        "stage": "Jungfrau"
+    },
+    {
+        "date": "14/06/2025",
+        "time": "23:20",
+        "band": "Slipknot",
+        "stage": "Jungfrau"
+    },
+    {
+        "date": "14/06/2025",
+        "time": "14:10",
+        "band": "Dry and Shattered",
+        "stage": "Eiger"
+    },
+    {
+        "date": "14/06/2025",
+        "time": "15:35",
+        "band": "Unified Move",
+        "stage": "Eiger"
+    },
+    {
+        "date": "14/06/2025",
+        "time": "17:00",
+        "band": "Adam Angst",
+        "stage": "Eiger"
+    },
+    {
+        "date": "14/06/2025",
+        "time": "18:30",
+        "band": "Good Riddance",
+        "stage": "Eiger"
+    },
+    {
+        "date": "14/06/2025",
+        "time": "20:15",
+        "band": "Starset",
+        "stage": "Eiger"
+    },
+    {
+        "date": "14/06/2025",
+        "time": "22:20",
+        "band": "Cemetery Skyline",
+        "stage": "Eiger"
     }
 ]
